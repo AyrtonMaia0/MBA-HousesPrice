@@ -8,8 +8,6 @@ import plotly.express as px
 st.set_page_config(page_title="Análise de Preços de Casas", layout="wide")
 st.title("Análise de Preços de Venda de Casas")
 
-
-
 # Estilo customizado para alterar os chips rosa no sidebar para azul
 st.markdown(
     """
@@ -31,8 +29,6 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
-
-
 
 # Carregar e renomear os dados
 @st.cache_data
@@ -125,41 +121,32 @@ def load_data():
     return df
 
 df = load_data()
+
 # Sidebar com filtros
 st.sidebar.header("Filtros")
-
-
 
 # Adiciona a opção 'Todos' no multiselect de bairros
 all_neighborhoods = ['Todos'] + df['Bairro'].dropna().unique().tolist()
 
-selected_zone = st.sidebar.multiselect(
-    "Zonas residenciais (ZonaMS):",
-    options=df['ZonaMS'].dropna().unique(),
-    default=df['ZonaMS'].dropna().unique()
-)
-
+# Apenas o filtro de Bairros
 selected_neighborhood = st.sidebar.multiselect(
     "Bairros:",
     options=all_neighborhoods,
-    default=[]
+    default=['Todos']  # Selecionando a opção "Todos" por padrão
 )
+
 # Lógica para selecionar todos os bairros se 'Todos' for escolhido
 if 'Todos' in selected_neighborhood:
     selected_neighborhood = df['Bairro'].dropna().unique().tolist()
 
-
-
-
 # Aplicar filtros
-filtered_df = df[(df['ZonaMS'].isin(selected_zone)) & (df['Bairro'].isin(selected_neighborhood))]
+filtered_df = df[df['Bairro'].isin(selected_neighborhood)]
+
 # Seção 1: Visão Geral
 st.subheader('"Quanto vale o seu lar?" — Uma viagem pelo mercado de casas de Ames, Iowa')
 st.write("Imagine uma cidade em transformação, onde cada casa guarda uma história — e um preço que diz muito mais do que parece. Em Ames, Iowa, exploramos 1.460 lares, desvendando como estrutura, localização e detalhes escondidos constroem o valor de mercado.")
-#st.dataframe(filtered_df.head())
 
 # Seção 2: Distribuição dos Preços de Venda
-#st.subheader("2. Distribuição do Preço de Venda")
 st.subheader('Bloco a bloco: O que realmente pesa no valor de uma casa? Será que o tamanho é tudo? Ou um porão bem-acabado pode fazer toda a diferença?')
 st.write('Descobrimos que:')
 st.write('Casas com acabamento de alto padrão (OverallQual) chegam a valer o dobro das comuns.')
@@ -172,13 +159,9 @@ ax1.set_title("Distribuição dos Preços de Venda")
 ax1.set_xlabel("Preço de Venda")
 st.pyplot(fig1)
 
-
 # Seção 3: Correlação com o Preço
 st.subheader("Caracteristicas que mais influenciam no Preço de Venda")
 st.write('Use o filtro ao lado para visualizar apenas os fatores de *Alta, **Média* ou *Baixa* influência. Isso ajuda a entender *O que mais pesa na precificação de um imóvel*.')
-#corr = filtered_df.select_dtypes(include='number').corr()
-#top_corr = corr["PrecoVenda"].sort_values(ascending=False)[1:11]
-#st.bar_chart(top_corr)
 
 # Função para classificar os níveis de correlação
 def nivel_influencia(valor):
@@ -194,7 +177,6 @@ def nivel_influencia(valor):
 corr = filtered_df.select_dtypes(include='number').corr()['PrecoVenda'].drop('PrecoVenda')
 corr_df = corr.to_frame(name='Correlação')
 corr_df['Influência'] = corr_df['Correlação'].apply(nivel_influencia)
-
 # Filtro interativo via radio
 nivel = st.radio("Selecione o nível de influência:", ["Alta", "Média", "Baixa"])
 
@@ -238,7 +220,4 @@ st.plotly_chart(fig_m2, use_container_width=True)
 
 
 st.subheader('Conclusão: muito além de tijolos e cimento')
-st.write('O valor de uma casa é mais do que a soma dos seus quartos, banheiros e metros quadrados. É também um reflexo do lugar onde ela está, do status que carrega e das decisões urbanas que moldam a cidade. Ames, com seus bairros tão diversos, mostra que o CEP é tão valioso quanto o próprio imóvel — e às vezes, até mais.')
-st.write('Nossa jornada por esses 1.460 lares revelou um mercado onde a localização dita o preço, onde bairros como NridgHt e StoneBr concentram o alto valor por m² mesmo em casas modestas, enquanto outras regiões oferecem mais espaço por menos.')
-st.write('Ao cruzar área, estrutura e vizinhança, percebemos que os dados contam histórias que o olho nu não vê. Eles nos ajudam a entender a lógica — e às vezes a injustiça — por trás da precificação urbana.')
 st.write('Seja para um comprador, corretor, urbanista ou pesquisador, essa análise mostra o poder dos dados para trazer clareza ao que parece apenas intuição. Porque no fim das contas, toda casa conta uma história — e todo bairro, um capítulo diferente da mesma cidade.')
